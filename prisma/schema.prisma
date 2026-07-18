@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // 通常アクセス用（Neonのpooler経由）
+  directUrl = env("DIRECT_URL") // テーブル作成などの管理作業用（直通）
+}
+
+model Member {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  role        String // "input"(入力可) | "view"(閲覧のみ)
+  position    String? // "Lines" | "Backs" | "Skills"
+  grade       Int? // 学年 1-4
+  createdAt   DateTime     @default(now())
+  workoutLogs WorkoutLog[]
+  maxRecords  MaxRecord[]
+  bodyWeights BodyWeight[]
+  goals       Goal[]
+}
+
+// 月末目標（体重とMAX3種目）。月ごとに1件
+model Goal {
+  id             Int     @id @default(autoincrement())
+  memberId       Int
+  member         Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  month          String // "2026-07" = 7月末の目標
+  targetWeightKg Float?
+  targetSquat    Float?
+  targetClean    Float?
+  targetBench    Float?
+
+  @@unique([memberId, month])
+}
+
+// 1行 = 1セット（筋トレMEMO方式）。同じ日・種目のセットをまとめて1セッションとして扱う
+model WorkoutLog {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  date      DateTime
+  exercise  String
+  bodyPart  String? // 脚・背中・胸・肩・腕・体幹
+  setNumber Int
+  weightKg  Float
+  reps      Int
+  createdAt DateTime @default(now())
+
+  @@index([memberId, date])
+  @@index([exercise])
+}
+
+model MaxRecord {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  date      DateTime
+  exercise  String
+  weightKg  Float? // 怪我で測定できなかった場合は null
+  injured   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([memberId, exercise, date])
+}
+
+model BodyWeight {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  date      DateTime
+  weightKg  Float
+  createdAt DateTime @default(now())
+
+  @@index([memberId, date])
+}
