@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL") // 通常アクセス用（Neonのpooler経由）
-  directUrl = env("DIRECT_URL") // テーブル作成などの管理作業用（直通）
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Member {
