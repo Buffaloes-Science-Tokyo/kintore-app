@@ -88,7 +88,7 @@ function WorkoutForm({ memberId, memberName }: { memberId: number; memberName: s
     setSets((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
   }
 
-  const validSets = sets.filter((s) => Number(s.weightKg) > 0 && Number(s.reps) > 0);
+  const validSets = sets.filter((s) => Number(s.weightKg) >= 0 && Number(s.reps) > 0);
   const volume = Math.round(
     validSets.reduce((a, s) => a + Number(s.weightKg) * Number(s.reps), 0)
   );
@@ -159,7 +159,7 @@ function WorkoutForm({ memberId, memberName }: { memberId: number; memberName: s
                 type="number"
                 inputMode="decimal"
                 step="0.5"
-                min="1"
+                min="0"
                 placeholder="60"
                 value={s.weightKg}
                 onChange={(e) => updateSet(i, "weightKg", e.target.value)}
