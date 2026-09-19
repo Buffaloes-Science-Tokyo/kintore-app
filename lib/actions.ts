@@ -73,7 +73,7 @@ export async function addWorkoutSets(
 
   sets = sets.filter(
     (s) =>
-      Number.isFinite(s.weightKg) && s.weightKg > 0 &&
+      Number.isFinite(s.weightKg) && s.weightKg >= 0 &&
       Number.isFinite(s.reps) && s.reps > 0
   );
   if (sets.length === 0) {
