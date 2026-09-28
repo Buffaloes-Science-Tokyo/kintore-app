@@ -246,6 +246,29 @@ button.primary:disabled {
   cursor: default;
 }
 
+button.danger {
+  background: transparent;
+  color: #d33;
+  border: 1.5px solid #d33;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 12px;
+}
+
+button.danger:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.edit-link {
+  white-space: nowrap;
+  font-size: 13px;
+}
+
 .form-message {
   margin-top: 10px;
   font-size: 13.5px;

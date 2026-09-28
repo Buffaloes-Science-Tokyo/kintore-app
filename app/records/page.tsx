@@ -184,18 +184,34 @@ async function TrainingView({ me, sp }: { me: Me; sp: SP }) {
                 <th>種目</th>
                 <th>セット内容（kg×回）</th>
                 <th>ボリューム</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              {sessions.map((s) => (
-                <tr key={s.key}>
-                  <td>{s.date.toISOString().slice(0, 10)}</td>
-                  <td>{s.bodyPart ?? "—"}</td>
-                  <td>{s.exercise}</td>
-                  <td>{formatSets(s.sets)}</td>
-                  <td>{Math.round(s.volume).toLocaleString()}kg</td>
-                </tr>
-              ))}
+              {sessions.map((s) => {
+                const date = s.date.toISOString().slice(0, 10);
+                return (
+                  <tr key={s.key}>
+                    <td>{date}</td>
+                    <td>{s.bodyPart ?? "—"}</td>
+                    <td>{s.exercise}</td>
+                    <td>{formatSets(s.sets)}</td>
+                    <td>{Math.round(s.volume).toLocaleString()}kg</td>
+                    <td>
+                      <Link
+                        className="edit-link"
+                        href={`/records/edit${buildQuery({
+                          member: String(me.id),
+                          date,
+                          exercise: s.exercise,
+                        })}`}
+                      >
+                        ✏️ 編集
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

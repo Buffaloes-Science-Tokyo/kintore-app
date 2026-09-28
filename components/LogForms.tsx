@@ -5,6 +5,8 @@ import Link from "next/link";
 import TodayMenu from "@/components/TodayMenu";
 import {
   addWorkoutSets,
+  updateWorkoutSession,
+  deleteWorkoutSession,
   addMaxRecord,
   addBodyWeight,
   upsertGoal,
@@ -63,14 +65,42 @@ function MemberSelect({
   );
 }
 
-/** 筋トレMEMO風: 種目を選び、セットを1行ずつ追加していく（本人の記録専用） */
-function WorkoutForm({ memberId, memberName }: { memberId: number; memberName: string }) {
-  const [result, action, pending] = useActionState(addWorkoutSets, null);
+/** 編集時に渡す既存セッションの内容 */
+export type WorkoutSessionData = {
+  date: string; // YYYY-MM-DD
+  exercise: string;
+  bodyPart: string;
+  sets: { weightKg: number; reps: number }[];
+};
+
+/**
+ * 筋トレMEMO風: 種目を選び、セットを1行ずつ追加していく（本人の記録専用）。
+ * initial を渡すと過去の記録の編集モードになる
+ */
+export function WorkoutForm({
+  memberId,
+  memberName,
+  initial,
+}: {
+  memberId: number;
+  memberName: string;
+  initial?: WorkoutSessionData;
+}) {
+  const isEdit = !!initial;
+  const [result, action, pending] = useActionState(
+    isEdit ? updateWorkoutSession : addWorkoutSets,
+    null
+  );
+  const [deleteResult, deleteAction, deleting] = useActionState(deleteWorkoutSession, null);
   useNotifyLogged(result);
-  const [date, setDate] = useState(today());
-  const [bodyPart, setBodyPart] = useState("");
-  const [exercise, setExercise] = useState("");
-  const [sets, setSets] = useState<SetInput[]>([{ weightKg: "", reps: "" }]);
+  const [date, setDate] = useState(initial?.date ?? today());
+  const [bodyPart, setBodyPart] = useState(initial?.bodyPart ?? "");
+  const [exercise, setExercise] = useState(initial?.exercise ?? "");
+  const [sets, setSets] = useState<SetInput[]>(
+    initial?.sets.map((s) => ({ weightKg: String(s.weightKg), reps: String(s.reps) })) ?? [
+      { weightKg: "", reps: "" },
+    ]
+  );
 
   function updateSet(index: number, field: keyof SetInput, value: string) {
     setSets((prev) =>
@@ -95,7 +125,14 @@ function WorkoutForm({ memberId, memberName }: { memberId: number; memberName: s
 
   return (
     <div className="card">
-      <h2>{memberName} のトレーニングを記録</h2>
+      <h2>
+        {memberName} のトレーニングを{isEdit ? "編集" : "記録"}
+      </h2>
+      <datalist id="exercise-list">
+        {COMMON_EXERCISES.map((e) => (
+          <option key={e} value={e} />
+        ))}
+      </datalist>
       <form
         action={(formData) => {
           formData.set(
@@ -105,11 +142,19 @@ function WorkoutForm({ memberId, memberName }: { memberId: number; memberName: s
             )
           );
           action(formData);
-          setSets([{ weightKg: "", reps: "" }]);
-          setExercise("");
+          if (!isEdit) {
+            setSets([{ weightKg: "", reps: "" }]);
+            setExercise("");
+          }
         }}
       >
         <input type="hidden" name="memberId" value={memberId} />
+        {initial && (
+          <>
+            <input type="hidden" name="origDate" value={initial.date} />
+            <input type="hidden" name="origExercise" value={initial.exercise} />
+          </>
+        )}
         <input type="hidden" name="sets" value="[]" />
         <div className="field-row">
           <label className="field">
@@ -158,7 +203,7 @@ function WorkoutForm({ memberId, memberName }: { memberId: number; memberName: s
               <input
                 type="number"
                 inputMode="decimal"
-                step="0.5"
+                step="0.1"
                 min="0"
                 placeholder="60"
                 value={s.weightKg}
@@ -202,11 +247,32 @@ function WorkoutForm({ memberId, memberName }: { memberId: number; memberName: s
           </span>
         </div>
 
-        <button className="primary" disabled={pending || validSets.length === 0}>
-          {pending ? "記録中…" : "この種目を記録する"}
+        <button className="primary" disabled={pending || deleting || validSets.length === 0}>
+          {isEdit
+            ? pending ? "保存中…" : "変更を保存する"
+            : pending ? "記録中…" : "この種目を記録する"}
         </button>
         <Message result={result} />
       </form>
+
+      {initial && (
+        <form
+          action={deleteAction}
+          onSubmit={(e) => {
+            if (!confirm(`${initial.date} の ${initial.exercise} の記録を削除しますか？`)) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <input type="hidden" name="memberId" value={memberId} />
+          <input type="hidden" name="origDate" value={initial.date} />
+          <input type="hidden" name="origExercise" value={initial.exercise} />
+          <button className="danger" disabled={pending || deleting}>
+            {deleting ? "削除中…" : "この記録を削除する"}
+          </button>
+          <Message result={deleteResult} />
+        </form>
+      )}
     </div>
   );
 }
@@ -253,7 +319,7 @@ function MaxForm({ members, initialId }: { members: MemberOption[]; initialId: n
               type="number"
               inputMode="decimal"
               name="weightKg"
-              step="0.5"
+              step="0.1"
               min="1"
               placeholder="100"
               required
@@ -374,7 +440,7 @@ function GoalForm({ members, initialId }: { members: MemberOption[]; initialId: 
                 type="number"
                 inputMode="decimal"
                 name="targetSquat"
-                step="0.5"
+                step="0.1"
                 min="1"
                 placeholder="100"
                 defaultValue={goal?.targetSquat ?? ""}
@@ -386,7 +452,7 @@ function GoalForm({ members, initialId }: { members: MemberOption[]; initialId: 
                 type="number"
                 inputMode="decimal"
                 name="targetClean"
-                step="0.5"
+                step="0.1"
                 min="1"
                 placeholder="70"
                 defaultValue={goal?.targetClean ?? ""}
@@ -398,7 +464,7 @@ function GoalForm({ members, initialId }: { members: MemberOption[]; initialId: 
                 type="number"
                 inputMode="decimal"
                 name="targetBench"
-                step="0.5"
+                step="0.1"
                 min="1"
                 placeholder="80"
                 defaultValue={goal?.targetBench ?? ""}
@@ -476,12 +542,6 @@ export default function LogForms({ members }: { members: MemberOption[] }) {
           🎯 目標
         </button>
       </div>
-
-      <datalist id="exercise-list">
-        {COMMON_EXERCISES.map((e) => (
-          <option key={e} value={e} />
-        ))}
-      </datalist>
 
       {tab === "workout" &&
         (isPlayer ? (
