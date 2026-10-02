@@ -81,10 +81,13 @@ export function WorkoutForm({
   memberId,
   memberName,
   initial,
+  returnTo,
 }: {
   memberId: number;
   memberName: string;
   initial?: WorkoutSessionData;
+  /** 編集後の戻り先（"log" なら「記録する」へ戻る） */
+  returnTo?: "log";
 }) {
   const isEdit = !!initial;
   const [result, action, pending] = useActionState(
@@ -153,6 +156,7 @@ export function WorkoutForm({
           <>
             <input type="hidden" name="origDate" value={initial.date} />
             <input type="hidden" name="origExercise" value={initial.exercise} />
+            {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
           </>
         )}
         <input type="hidden" name="sets" value="[]" />
@@ -267,6 +271,7 @@ export function WorkoutForm({
           <input type="hidden" name="memberId" value={memberId} />
           <input type="hidden" name="origDate" value={initial.date} />
           <input type="hidden" name="origExercise" value={initial.exercise} />
+          {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
           <button className="danger" disabled={pending || deleting}>
             {deleting ? "削除中…" : "この記録を削除する"}
           </button>

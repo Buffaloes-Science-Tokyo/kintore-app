@@ -112,6 +112,13 @@ function sessionWhere(memberId: number, formData: FormData) {
   return { memberId, exercise, date: { gte: date, lt: next } };
 }
 
+/** 編集・削除後の戻り先。「記録する」の今日の記録から来た場合はそこへ戻す */
+function afterEditPath(memberId: number, formData: FormData) {
+  return formData.get("returnTo") === "log"
+    ? "/log"
+    : `/records?view=training&member=${memberId}`;
+}
+
 /** 筋トレMEMO方式: 1種目ぶんのセットをまとめて記録する */
 export async function addWorkoutSets(
   _prev: ActionResult | null,
@@ -155,7 +162,7 @@ export async function updateWorkoutSession(
   if (!replaced) return { ok: false, message: "編集対象の記録が見つかりません（削除済みの可能性があります）" };
 
   revalidatePath("/", "layout");
-  redirect(`/records?view=training&member=${memberId}`);
+  redirect(afterEditPath(memberId, formData));
 }
 
 /** 過去のトレーニング記録（1種目ぶんのセット）を削除する */
@@ -171,7 +178,7 @@ export async function deleteWorkoutSession(
 
   await prisma.workoutLog.deleteMany({ where });
   revalidatePath("/", "layout");
-  redirect(`/records?view=training&member=${memberId}`);
+  redirect(afterEditPath(memberId, formData));
 }
 
 export async function addMaxRecord(

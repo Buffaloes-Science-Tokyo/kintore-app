@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 type TodayData = {
@@ -54,6 +55,17 @@ export default function TodayMenu({ memberId, memberName }: { memberId: number; 
                   <span className="today-vol">
                     {s.sets.length}セット・{Math.round(s.volume).toLocaleString()}kg
                   </span>
+                  <Link
+                    className="edit-link"
+                    href={`/records/edit?${new URLSearchParams({
+                      member: String(memberId),
+                      date: todayStr(),
+                      exercise: s.exercise,
+                      from: "log",
+                    })}`}
+                  >
+                    ✏️ 編集
+                  </Link>
                 </li>
               ))}
             </ul>

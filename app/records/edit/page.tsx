@@ -16,7 +16,10 @@ export default async function EditWorkoutPage({
   const exercise = sp.exercise ?? "";
   const date = new Date(dateStr);
 
-  const backHref = `/records?view=training${sp.member ? `&member=${sp.member}` : ""}`;
+  const fromLog = sp.from === "log";
+  const backHref = fromLog
+    ? "/log"
+    : `/records?view=training${sp.member ? `&member=${sp.member}` : ""}`;
 
   const member =
     Number.isInteger(memberId) && memberId > 0
@@ -38,7 +41,7 @@ export default async function EditWorkoutPage({
     <>
       <h1 className="page-title">トレーニング記録の編集</h1>
       <p className="page-desc">
-        <Link href={backHref}>← 記録一覧に戻る</Link>
+        <Link href={backHref}>← {fromLog ? "記録する" : "記録一覧"}に戻る</Link>
       </p>
 
       {!member || logs.length === 0 ? (
@@ -49,6 +52,7 @@ export default async function EditWorkoutPage({
         <WorkoutForm
           memberId={member.id}
           memberName={member.name}
+          returnTo={fromLog ? "log" : undefined}
           initial={{
             date: dateStr,
             exercise,
