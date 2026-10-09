@@ -115,7 +115,7 @@ function sessionWhere(memberId: number, formData: FormData) {
 /** 編集・削除後の戻り先。「記録する」の今日の記録から来た場合はそこへ戻す */
 function afterEditPath(memberId: number, formData: FormData) {
   return formData.get("returnTo") === "log"
-    ? "/log"
+    ? "/"
     : `/records?view=training&member=${memberId}`;
 }
 

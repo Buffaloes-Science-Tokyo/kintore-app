@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { loadCurrentMember } from "@/lib/currentMember";
 
 /**
- * ホームで選択した部員（localStorage）をURLの ?member= に反映する。
+ * ヘッダーやダッシュボードで選択した部員（localStorage）をURLの ?member= に反映する。
  * サーバー側では member パラメータを見て本人の記録だけを表示する。
  */
 export default function MemberSync() {

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
-import { MAX_EXERCISES, POSITIONS } from "@/lib/exercises";
+import { MAX_EXERCISES } from "@/lib/exercises";
+import { csvResponse, monthRange, sortMembersForReport } from "@/lib/report";
 
 // 月次レポートCSV: 部員ごとの目標と実績（体重・MAX3種目）
 // /api/report?month=2026-06 （省略時は先月）
@@ -12,8 +13,7 @@ export async function GET(request: Request) {
       .toISOString()
       .slice(0, 7);
   }
-  const start = new Date(`${month}-01T00:00:00Z`);
-  const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 1));
+  const { start, end } = monthRange(month);
   const range = { gte: start, lt: end };
 
   const [members, goals, weights, maxes] = await Promise.all([
@@ -23,17 +23,7 @@ export async function GET(request: Request) {
     prisma.maxRecord.findMany({ where: { date: range } }),
   ]);
 
-  // 並び順: Lines → Backs → Skills（未設定は最後）、ポジション内は4年→1年
-  const posOrder = new Map(POSITIONS.map((p, i) => [p, i]));
-  members.sort((a, b) => {
-    const pa = a.position != null ? posOrder.get(a.position)! : 99;
-    const pb = b.position != null ? posOrder.get(b.position)! : 99;
-    if (pa !== pb) return pa - pb;
-    const ga = a.grade ?? 0;
-    const gb = b.grade ?? 0;
-    if (ga !== gb) return gb - ga;
-    return a.name.localeCompare(b.name, "ja");
-  });
+  sortMembersForReport(members);
 
   const goalBy = new Map(goals.map((g) => [g.memberId, g]));
 
@@ -103,14 +93,5 @@ export async function GET(request: Request) {
     ];
   });
 
-  // Excelで文字化けしないようBOM付きUTF-8で出力
-  const csv =
-    "﻿" + [header, ...rows].map((r) => r.join(",")).join("\r\n") + "\r\n";
-
-  return new Response(csv, {
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="buffaloes_report_${month}.csv"`,
-    },
-  });
+  return csvResponse([header, ...rows], `buffaloes_report_${month}.csv`);
 }

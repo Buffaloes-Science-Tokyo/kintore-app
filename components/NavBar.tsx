@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { saveCurrentMember, useCurrentMember } from "@/lib/currentMember";
 
 const LINKS = [
-  { href: "/", label: "ホーム", short: "ホーム", icon: "🏠" },
-  { href: "/log", label: "記録する", short: "記録", icon: "✏️" },
+  { href: "/", label: "記録する", short: "記録", icon: "✏️" },
+  { href: "/dashboard", label: "ダッシュボード", short: "ダッシュ", icon: "🎯" },
   { href: "/charts/max", label: "MAX×KPI", short: "MAX", icon: "📈" },
   { href: "/charts/weight", label: "体重グラフ", short: "体重", icon: "⚖️" },
   { href: "/records", label: "記録一覧", short: "一覧", icon: "📋" },

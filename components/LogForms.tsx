@@ -483,7 +483,7 @@ function GoalForm({ members, initialId }: { members: MemberOption[]; initialId: 
         </form>
       )}
       <p className="corr-note">
-        目標体重との差はホームのランキングに反映されます
+        目標体重との差はダッシュボードのランキングに反映されます
       </p>
     </div>
   );
@@ -504,7 +504,7 @@ export default function LogForms({ members }: { members: MemberOption[] }) {
     return (
       <div className="card">
         <p className="empty">
-          先に<Link href="/">ホーム</Link>かヘッダー右上で自分の名前を選んでください。
+          先に<Link href="/dashboard">ダッシュボード</Link>かヘッダー右上で自分の名前を選んでください。
         </p>
       </div>
     );

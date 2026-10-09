@@ -429,8 +429,15 @@ button.danger:disabled {
   flex-wrap: wrap;
 }
 
+.dl-row .month-input {
+  width: auto;
+}
+
 .dl-btn {
   display: inline-block;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
   background: var(--blue);
   color: #fff;
   font-weight: 700;

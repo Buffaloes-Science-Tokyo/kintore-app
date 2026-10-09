@@ -18,7 +18,7 @@ export default async function EditWorkoutPage({
 
   const fromLog = sp.from === "log";
   const backHref = fromLog
-    ? "/log"
+    ? "/"
     : `/records?view=training${sp.member ? `&member=${sp.member}` : ""}`;
 
   const member =

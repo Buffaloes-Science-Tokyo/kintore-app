@@ -44,8 +44,8 @@ export default async function RecordsPage({
       <h1 className="page-title">記録一覧</h1>
       <p className="page-desc">
         {me
-          ? `${me.name} さんの記録を表示しています（ホームで名前を切り替えられます）`
-          : "ホームで名前を選ぶと、自分の記録が表示されます"}
+          ? `${me.name} さんの記録を表示しています（ヘッダー右上で名前を切り替えられます）`
+          : "ヘッダー右上で名前を選ぶと、自分の記録が表示されます"}
       </p>
 
       <div className="tabs">
@@ -439,7 +439,7 @@ function NoMember() {
   return (
     <div className="card">
       <p className="empty">
-        <Link href="/">ホーム</Link>で自分の名前を選ぶと、ここに記録が表示されます
+        <Link href="/dashboard">ダッシュボード</Link>で自分の名前を選ぶと、ここに記録が表示されます
       </p>
     </div>
   );
